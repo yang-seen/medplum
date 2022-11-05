@@ -1,7 +1,9 @@
-import { Space } from '@mantine/core';
-import { MEDPLUM_VERSION } from '@medplum/core';
+import { ColorScheme, ColorSchemeProvider, MantineProvider, MantineThemeOverride, Space } from '@mantine/core';
+import { useColorScheme } from '@mantine/hooks';
+import { Notifications } from '@mantine/notifications';
+import { MEDPLUM_VERSION, MedplumClient } from '@medplum/core';
 import { UserConfiguration } from '@medplum/fhirtypes';
-import { AppShell, Loading, Logo, NavbarMenu, useMedplum } from '@medplum/react';
+import { AppShell, Loading, Logo, MedplumProvider, MepdlumNavigateFunction, NavbarMenu } from '@medplum/react';
 import {
   Icon,
   IconBrandAsana,
@@ -17,35 +19,72 @@ import {
   IconStar,
   IconWebhook,
 } from '@tabler/icons-react';
-import React, { Suspense } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { AppRoutes } from './AppRoutes';
+import React, { Suspense, useState } from 'react';
+import { RouterProvider } from 'react-router-dom';
 
-import './App.css';
+export interface AppProps {
+  medplum: MedplumClient;
+  router: any;
+  navigate: MepdlumNavigateFunction;
+}
 
-export function App(): JSX.Element {
-  const medplum = useMedplum();
-  const config = medplum.getUserConfiguration();
-  const location = useLocation();
-  const [searchParams] = useSearchParams();
+const theme: MantineThemeOverride = {
+  headings: {
+    sizes: {
+      h1: {
+        fontSize: '1.125rem',
+        fontWeight: 500,
+        lineHeight: 2.0,
+      },
+    },
+  },
+  fontSizes: {
+    xs: '0.6875rem',
+    sm: '0.875rem',
+    md: '0.875rem',
+    lg: '1.0rem',
+    xl: '1.125rem',
+  },
+};
 
-  if (medplum.isLoading()) {
-    return <Loading />;
-  }
+export function App(props: AppProps): JSX.Element {
+  const { medplum, router, navigate } = props;
+  const userConfig = medplum.getUserConfiguration();
+  const location = window.location;
+  const searchParams = new URLSearchParams(location.search);
+  const preferredColorScheme = useColorScheme();
+  const [specifiedColorScheme, setSpecifiedColorScheme] = useState<ColorScheme | undefined>(undefined);
+  const [colorScheme, setColorScheme] = useState<ColorScheme>(specifiedColorScheme ?? preferredColorScheme);
+
+  const toggleColorScheme = (value?: ColorScheme): void => {
+    setSpecifiedColorScheme(value);
+    setColorScheme(value ?? preferredColorScheme);
+  };
 
   return (
-    <AppShell
-      logo={<Logo size={24} />}
-      pathname={location.pathname}
-      searchParams={searchParams}
-      version={MEDPLUM_VERSION}
-      menus={userConfigToMenu(config)}
-      displayAddBookmark={!!config?.id}
-    >
-      <Suspense fallback={<Loading />}>
-        <AppRoutes />
-      </Suspense>
-    </AppShell>
+    <React.StrictMode>
+      <MedplumProvider medplum={medplum} navigate={navigate}>
+        <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
+          <MantineProvider theme={{ ...theme, colorScheme }} withGlobalStyles withNormalizeCSS>
+            <Notifications position="bottom-right" />
+            <AppShell
+              logo={<Logo size={24} />}
+              pathname={location.pathname}
+              searchParams={searchParams}
+              version={MEDPLUM_VERSION}
+              menus={userConfigToMenu(userConfig)}
+              displayAddBookmark={!!userConfig?.id}
+              colorScheme={specifiedColorScheme}
+              setColorScheme={toggleColorScheme}
+            >
+              <Suspense fallback={<Loading />}>
+                <RouterProvider router={router} />
+              </Suspense>
+            </AppShell>
+          </MantineProvider>
+        </ColorSchemeProvider>
+      </MedplumProvider>
+    </React.StrictMode>
   );
 }
 

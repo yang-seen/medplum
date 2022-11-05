@@ -1,4 +1,4 @@
-import { AppShell as MantineAppShell, useMantineTheme } from '@mantine/core';
+import { ColorScheme, AppShell as MantineAppShell, useMantineTheme } from '@mantine/core';
 import React, { Suspense, useState } from 'react';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { Loading } from '../Loading/Loading';
@@ -14,6 +14,8 @@ export interface AppShellProps {
   menus?: NavbarMenu[];
   children: React.ReactNode;
   displayAddBookmark?: boolean;
+  colorScheme?: ColorScheme;
+  setColorScheme?: (colorScheme: ColorScheme | undefined) => void;
 }
 
 export function AppShell(props: AppShellProps): JSX.Element {
@@ -56,6 +58,8 @@ export function AppShell(props: AppShellProps): JSX.Element {
             logo={props.logo}
             version={props.version}
             navbarToggle={toggleNavbar}
+            colorScheme={props.colorScheme}
+            setColorScheme={props.setColorScheme}
           />
         )
       }

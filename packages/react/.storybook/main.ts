@@ -17,6 +17,7 @@ const config: StorybookConfig = {
         },
       },
     },
+    'storybook-dark-mode',
   ],
   staticDirs: ['../public'],
   framework: {

@@ -1,4 +1,15 @@
-import { Avatar, createStyles, Group, Header as MantineHeader, Menu, Stack, Text, UnstyledButton } from '@mantine/core';
+import {
+  Avatar,
+  ColorScheme,
+  createStyles,
+  Group,
+  Header as MantineHeader,
+  Menu,
+  SegmentedControl,
+  Stack,
+  Text,
+  UnstyledButton,
+} from '@mantine/core';
 import { formatHumanName, getReferenceString, ProfileResource } from '@medplum/core';
 import { HumanName } from '@medplum/fhirtypes';
 import { IconChevronDown, IconLogout, IconSettings, IconSwitchHorizontal } from '@tabler/icons-react';
@@ -59,6 +70,8 @@ interface HeaderProps {
   logo: React.ReactNode;
   version?: string;
   navbarToggle: () => void;
+  colorScheme?: ColorScheme;
+  setColorScheme?: (colorScheme: ColorScheme | undefined) => void;
 }
 
 export function Header(props: HeaderProps): JSX.Element {
@@ -134,6 +147,22 @@ export function Header(props: HeaderProps): JSX.Element {
                     </Group>
                   </Menu.Item>
                 )
+            )}
+            {props.setColorScheme && <Menu.Divider />}
+            {props.setColorScheme && (
+              <SegmentedControl
+                value={props.colorScheme ?? 'auto'}
+                onChange={(newValue: ColorScheme | 'auto') => {
+                  (props.setColorScheme as (colorScheme: ColorScheme | undefined) => void)(
+                    newValue === 'auto' ? undefined : newValue
+                  );
+                }}
+                data={[
+                  { label: 'Auto', value: 'auto' },
+                  { label: 'Dark', value: 'dark' },
+                  { label: 'Light', value: 'light' },
+                ]}
+              />
             )}
             <Menu.Divider />
             <Menu.Item icon={<IconSwitchHorizontal size={14} stroke={1.5} />} onClick={() => navigate('/signin')}>

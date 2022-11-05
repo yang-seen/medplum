@@ -20,6 +20,7 @@ const medplum = new MockClient();
 medplum.get('/');
 
 const theme: MantineThemeOverride = {
+  colorScheme: 'dark',
   headings: {
     sizes: {
       h1: {
