@@ -87,43 +87,6 @@ async function processMrconso(): Promise<void> {
       continue;
     }
 
-    // TS Term status
-    // P = Preferred LUI of the CUI
-    // S = Non-Preferred LUI of the CUI
-    if (columns[2] !== 'P') {
-      // Ignore non-preferred terms
-      continue;
-    }
-
-    // STT String type
-    // PF = Preferred form of term
-    // VCW = Case and word-order variant of the preferred form
-    // VC = Case variant of the preferred form
-    // VO = Variant of the preferred form
-    // VW = Word-order variant of the preferred form
-    if (columns[4] !== 'PF') {
-      // Ignore non-preferred terms
-      continue;
-    }
-
-    // ISPREF Indicates whether AUI is preferred
-    if (columns[6] !== 'Y') {
-      // Ignore non-preferred terms
-      continue;
-    }
-
-    // TTY Term type in source
-    if (columns[12] === 'ET') {
-      // Ignore "Entry Term"
-      continue;
-    }
-
-    // SUPPRESS Suppressible flag
-    if (columns[16] === 'Y') {
-      // Ignore suppressed terms
-      continue;
-    }
-
     const source = columns[11];
     let outStream = undefined;
     switch (source) {
