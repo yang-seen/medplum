@@ -3,7 +3,7 @@ sidebar_position: 2
 toc_max_heading_level: 2
 ---
 
-# Bots in CLI
+# Bots in Production
 
 Editing bots in the web editor is good for getting started quickly, but as Bots become more important you will want to manage them as part of your regular software development lifecycle. This means:
 
