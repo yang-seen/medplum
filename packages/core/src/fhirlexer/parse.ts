@@ -3,7 +3,7 @@ import { Token } from './tokenize';
 
 export interface AtomContext {
   parent?: AtomContext;
-  variables: Record<string, TypedValue>;
+  variables: Record<string, TypedValue | undefined>;
 }
 export interface Atom {
   eval(context: AtomContext, input: TypedValue[]): TypedValue[];
@@ -84,7 +84,7 @@ export class ParserBuilder {
 
 export class Parser {
   private tokens: Token[];
-  private prefixParselets: Record<string, PrefixParselet>;
+  private prefixParselets: Record<string, PrefixParselet | undefined>;
   private infixParselets: Record<string, InfixParselet>;
 
   constructor(

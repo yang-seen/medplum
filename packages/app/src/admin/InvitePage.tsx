@@ -36,7 +36,7 @@ export function InvitePage(): JSX.Element {
           } else {
             setResult(response);
           }
-          setEmailSent(body.sendEmail ?? false);
+          setEmailSent(body.sendEmail);
           showNotification({ color: 'green', message: 'Invite success' });
         })
         .catch((err) => {

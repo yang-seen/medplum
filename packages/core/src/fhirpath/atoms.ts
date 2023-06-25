@@ -355,10 +355,10 @@ export class XorAtom extends InfixOperatorAtom {
 export class FunctionAtom implements Atom {
   constructor(public readonly name: string, public readonly args: Atom[]) {}
   eval(context: AtomContext, input: TypedValue[]): TypedValue[] {
-    const impl = functions[this.name];
-    if (!impl) {
+    if (!(this.name in functions)) {
       throw new Error('Unrecognized function: ' + this.name);
     }
+    const impl = functions[this.name];
     return impl(context, input, ...this.args);
   }
 

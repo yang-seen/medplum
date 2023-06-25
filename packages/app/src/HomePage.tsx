@@ -117,7 +117,7 @@ export function HomePage(): JSX.Element {
   );
 }
 
-function addSearchValues(search: SearchRequest, config: UserConfiguration | undefined): SearchRequest {
+function addSearchValues(search: Partial<SearchRequest>, config: UserConfiguration | undefined): SearchRequest {
   const resourceType = search.resourceType || getDefaultResourceType(config);
   const fields = search.fields ?? getDefaultFields(resourceType);
   const filters = search.filters ?? (!search.resourceType ? getDefaultFilters(resourceType) : undefined);
@@ -136,12 +136,10 @@ function addSearchValues(search: SearchRequest, config: UserConfiguration | unde
   };
 }
 
-function getDefaultResourceType(config: UserConfiguration | undefined): string {
-  return (
-    localStorage.getItem('defaultResourceType') ||
+function getDefaultResourceType(config: UserConfiguration | undefined): ResourceType {
+  return (localStorage.getItem('defaultResourceType') ||
     config?.option?.find((o) => o.id === 'defaultResourceType')?.valueString ||
-    'Patient'
-  );
+    'Patient') as ResourceType;
 }
 
 export function getDefaultFields(resourceType: string): string[] {

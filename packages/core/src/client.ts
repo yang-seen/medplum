@@ -577,7 +577,7 @@ export class MedplumClient extends EventTarget {
     }
 
     if (options?.autoBatchTime) {
-      this.autoBatchTime = options.autoBatchTime ?? 0;
+      this.autoBatchTime = options.autoBatchTime;
       this.autoBatchQueue = [];
     } else {
       this.autoBatchTime = 0;
@@ -1533,9 +1533,6 @@ export class MedplumClient extends EventTarget {
    * @returns The result of the create operation.
    */
   createResource<T extends Resource>(resource: T, options?: RequestInit): Promise<T> {
-    if (!resource.resourceType) {
-      throw new Error('Missing resourceType');
-    }
     this.invalidateSearches(resource.resourceType);
     return this.post(this.fhirUrl(resource.resourceType), resource, undefined, options);
   }
@@ -1638,11 +1635,8 @@ export class MedplumClient extends EventTarget {
       xhr.responseType = 'json';
       xhr.onabort = () => reject(new Error('Request aborted'));
       xhr.onerror = () => reject(new Error('Request error'));
-
-      if (onProgress) {
-        xhr.upload.onprogress = (e) => onProgress(e);
-        xhr.upload.onload = (e) => onProgress(e);
-      }
+      xhr.upload.onprogress = (e) => onProgress(e);
+      xhr.upload.onload = (e) => onProgress(e);
 
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
@@ -1768,9 +1762,6 @@ export class MedplumClient extends EventTarget {
    * @returns The result of the update operation.
    */
   async updateResource<T extends Resource>(resource: T, options?: RequestInit): Promise<T> {
-    if (!resource.resourceType) {
-      throw new Error('Missing resourceType');
-    }
     if (!resource.id) {
       throw new Error('Missing id');
     }
@@ -2109,7 +2100,7 @@ export class MedplumClient extends EventTarget {
   }
 
   private addLogin(newLogin: LoginState): void {
-    const logins = this.getLogins().filter((login) => login.profile?.reference !== newLogin.profile?.reference);
+    const logins = this.getLogins().filter((login) => login.profile.reference !== newLogin.profile.reference);
     logins.push(newLogin);
     this.storage.setObject('logins', logins);
   }
@@ -2876,6 +2867,8 @@ export class MedplumClient extends EventTarget {
  * @returns The default fetch function for the current environment.
  */
 function getDefaultFetch(): FetchLike {
+  // Fetch is not always available in Node.js
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!globalThis.fetch) {
     throw new Error('Fetch not available in this environment');
   }

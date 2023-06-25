@@ -295,14 +295,12 @@ function ask(text: string, defaultValue: string | number = ''): Promise<string> 
  */
 async function choose(text: string, options: (string | number)[], defaultValue = ''): Promise<string> {
   const str = text + ' [' + options.map((o) => (o === defaultValue ? '(' + o + ')' : o)).join('|') + ']';
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    const answer = (await ask(str)) || defaultValue;
-    if (options.includes(answer)) {
-      return answer;
-    }
-    print('Please choose one of the following options: ' + options.join(', '));
+  const answer = (await ask(str)) || defaultValue;
+  if (options.includes(answer)) {
+    return answer;
   }
+  print('Please choose one of the following options: ' + options.join(', '));
+  return choose(text, options, defaultValue);
 }
 
 /**

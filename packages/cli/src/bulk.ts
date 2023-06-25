@@ -130,7 +130,7 @@ function addExtensionsForMissingValuesExplanationOfBenefits(resource: Explanatio
   }
 
   resource.item?.forEach((item: ExplanationOfBenefitItem) => {
-    if (!item?.productOrService) {
+    if (!item.productOrService) {
       item.productOrService = getUnsupportedExtension();
     }
   });

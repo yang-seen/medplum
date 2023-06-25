@@ -33,11 +33,9 @@ export const tagKey = 'medplum:environment';
  */
 export async function getAllStacks(): Promise<(StackSummary & { StackName: string })[]> {
   const listResult = await cloudFormationClient.send(new ListStacksCommand({}));
-  return (
-    (listResult.StackSummaries?.filter((s) => s.StackName && s.StackStatus !== 'DELETE_COMPLETE') as (StackSummary & {
-      StackName: string;
-    })[]) || []
-  );
+  return (listResult.StackSummaries?.filter((s) => s.StackStatus !== 'DELETE_COMPLETE') ?? []) as (StackSummary & {
+    StackName: string;
+  })[];
 }
 
 /**
@@ -65,7 +63,7 @@ export async function getStackByTag(tag: string): Promise<MedplumStackDetails | 
 export async function getStackDetails(stackName: string): Promise<MedplumStackDetails | undefined> {
   const describeStacksCommand = new DescribeStacksCommand({ StackName: stackName });
   const stackDetails = await cloudFormationClient.send(describeStacksCommand);
-  const stack = stackDetails?.Stacks?.[0];
+  const stack = stackDetails.Stacks?.[0];
   const medplumTag = stack?.Tags?.find((tag) => tag.Key === tagKey);
   if (!medplumTag) {
     return undefined;

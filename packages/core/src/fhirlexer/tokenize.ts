@@ -249,11 +249,11 @@ export class Tokenizer {
   }
 
   private prev(): string {
-    return this.str[this.pos.index - 1] ?? '';
+    return this.pos.index > 0 ? this.str[this.pos.index - 1] : '';
   }
 
   private peek(): string {
-    return this.str[this.pos.index + 1] ?? '';
+    return this.pos.index < this.str.length - 1 ? this.str[this.pos.index + 1] : '';
   }
 
   private mark(): void {

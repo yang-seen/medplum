@@ -37,7 +37,7 @@ export async function saveBot(medplum: MedplumClient, botConfig: MedplumBotConfi
       ...bot,
       code,
     });
-    if (!updateResult) {
+    if (updateResult.meta?.versionId === bot.meta?.versionId) {
       console.log('Bot not modified');
     } else {
       console.log('Success! New bot version: ' + updateResult.meta?.versionId);
