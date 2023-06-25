@@ -70,13 +70,13 @@ export function parseStructureDefinition(sd: StructureDefinition): InternalTypeS
 
 const DATA_TYPES: Record<string, InternalTypeSchema> = Object.create(null);
 
-export function loadDataTypes(bundle: Bundle<StructureDefinition>): void {
+export function loadDataTypes(bundle: Bundle): void {
   for (const { resource: sd } of bundle.entry ?? []) {
-    if (!sd?.name) {
-      throw new Error(`Failed loading StructureDefinition from bundle`);
-    }
-    if (sd.resourceType !== 'StructureDefinition') {
+    if (sd?.resourceType !== 'StructureDefinition') {
       continue;
+    }
+    if (!sd.name) {
+      throw new Error(`Failed loading StructureDefinition from bundle`);
     }
     const schema = parseStructureDefinition(sd);
     DATA_TYPES[sd.name] = schema;
@@ -87,7 +87,7 @@ export function loadDataTypes(bundle: Bundle<StructureDefinition>): void {
 }
 
 export function getDataType(type: string): InternalTypeSchema {
-  const schema = DATA_TYPES[type];
+  const schema = DATA_TYPES[type] as InternalTypeSchema | undefined;
   if (!schema) {
     throw new OperationOutcomeError(serverError(Error('Unknown data type: ' + type)));
   }
@@ -178,7 +178,7 @@ class StructureDefinitionParser {
 
   private checkFieldEnter(element: ElementDefinition, field: ElementValidator): void {
     if (this.isInnerType(element)) {
-      while (this.backboneContext && !pathsCompatible(this.backboneContext?.path, element.path)) {
+      while (this.backboneContext && !pathsCompatible(this.backboneContext.path, element.path)) {
         // Starting new inner type, unwind type stack to this property's parent
         this.innerTypes.push(this.backboneContext.type);
         this.backboneContext = this.backboneContext.parent;
@@ -198,13 +198,13 @@ class StructureDefinitionParser {
     }
     if (element.slicing && !this.slicingContext) {
       field.slicing = {
-        discriminator: (element.slicing?.discriminator ?? []).map((d) => ({
+        discriminator: (element.slicing.discriminator ?? []).map((d) => ({
           path: d.path as string,
           type: d.type as string,
         })),
         slices: [],
-        ordered: element.slicing?.ordered ?? false,
-        rule: element.slicing?.rules,
+        ordered: element.slicing.ordered ?? false,
+        rule: element.slicing.rules,
       };
       this.slicingContext = { field: field.slicing, path: element.path ?? '' };
     }
@@ -226,7 +226,7 @@ class StructureDefinitionParser {
     if (this.slicingContext && !pathsCompatible(this.slicingContext.path, element?.path as string)) {
       // Path must be compatible with the sliced field path (i.e. have it as a prefix) to be a part of the
       // same slice group; otherwise, that group is finished and this is the start of a new field
-      if (this.slicingContext?.current) {
+      if (this.slicingContext.current) {
         this.slicingContext.field.slices.push(this.slicingContext.current);
       }
       delete this.slicingContext;
@@ -243,11 +243,13 @@ class StructureDefinitionParser {
   }
 
   private peek(): ElementDefinition | undefined {
-    const element = this.elements[this.index];
+    const element = this.elements[this.index] as ElementDefinition | undefined;
     if (element) {
       this.elementIndex[element.path ?? ''] = element;
       if (element.contentReference) {
-        const ref = this.elementIndex[element.contentReference.slice(element.contentReference.indexOf('#') + 1)];
+        const ref = this.elementIndex[element.contentReference.slice(element.contentReference.indexOf('#') + 1)] as
+          | ElementDefinition
+          | undefined;
         if (!ref) {
           return undefined;
         }
@@ -265,7 +267,7 @@ class StructureDefinitionParser {
   private isInnerType(current: ElementDefinition): boolean {
     const next = this.peek();
     return !!(
-      pathsCompatible(current?.path, next?.path) &&
+      pathsCompatible(current.path, next?.path) &&
       current.type?.some((t) => ['BackboneElement', 'Element'].includes(t.code as string))
     );
   }

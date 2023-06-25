@@ -1,7 +1,7 @@
-import { ElementDefinition, OperationOutcomeIssue, Resource } from '@medplum/fhirtypes';
+import { ElementDefinition, OperationOutcomeIssue, ResourceType } from '@medplum/fhirtypes';
 import { getTypedPropertyValue, toTypedValue } from './fhirpath';
 import { OperationOutcomeError, validationError } from './outcomes';
-import { globalSchema, PropertyType, TypedValue } from './types';
+import { PropertyType, TypeSchema, TypedValue, globalSchema } from './types';
 import { capitalize, getExtensionValue, isEmpty, isLowerCase } from './utils';
 
 /*
@@ -80,9 +80,9 @@ const baseResourceProperties = new Set<string>([
  * @param resourceType The candidate resource type string.
  * @returns True if the resource type is a valid FHIR resource type.
  */
-export function isResourceType(resourceType: string): boolean {
-  const typeSchema = globalSchema.types[resourceType];
-  return (
+export function isResourceType(resourceType: string): resourceType is ResourceType {
+  const typeSchema = globalSchema.types[resourceType] as TypeSchema | undefined;
+  return !!(
     typeSchema &&
     typeSchema.structureDefinition.id === resourceType &&
     typeSchema.structureDefinition.kind === 'resource'
@@ -162,15 +162,15 @@ export function validateResourceType(resourceType: string): void {
  * ```
  * @param resource The candidate resource.
  */
-export function validateResource<T extends Resource>(resource: T): void {
+export function validateResource(resource: unknown): void {
   new FhirSchemaValidator(resource).validate();
 }
 
-export class FhirSchemaValidator<T extends Resource> {
+export class FhirSchemaValidator {
   private readonly issues: OperationOutcomeIssue[];
-  private readonly root: T;
+  private readonly root: unknown;
 
-  constructor(root: T) {
+  constructor(root: unknown) {
     this.issues = [];
     this.root = root;
   }
@@ -181,9 +181,17 @@ export class FhirSchemaValidator<T extends Resource> {
       throw new OperationOutcomeError(validationError('Resource is null'));
     }
 
-    const resourceType = resource.resourceType;
+    if (typeof resource !== 'object') {
+      throw new OperationOutcomeError(validationError('Resource is not an object'));
+    }
+
+    const resourceType = (resource as Record<string, unknown>).resourceType;
     if (!resourceType) {
       throw new OperationOutcomeError(validationError('Missing resource type'));
+    }
+
+    if (typeof resourceType !== 'string') {
+      throw new OperationOutcomeError(validationError('Resource type must be a string'));
     }
 
     // Check for "null" once for the entire object hierarchy
@@ -200,7 +208,7 @@ export class FhirSchemaValidator<T extends Resource> {
   }
 
   private validateObject(typedValue: TypedValue, path: string): void {
-    const definition = globalSchema.types[typedValue.type];
+    const definition = globalSchema.types[typedValue.type] as TypeSchema | undefined;
     if (!definition) {
       throw new OperationOutcomeError(validationError('Unknown type: ' + typedValue.type));
     }
@@ -292,7 +300,7 @@ export class FhirSchemaValidator<T extends Resource> {
     }
 
     // Try to get the regex
-    const valueDefinition = globalSchema.types[type]?.properties['value'];
+    const valueDefinition = (globalSchema.types[type] as TypeSchema | undefined)?.properties['value'];
     if (valueDefinition?.type) {
       const regex = getExtensionValue(valueDefinition.type[0], 'http://hl7.org/fhir/StructureDefinition/regex');
       if (regex) {
@@ -422,7 +430,7 @@ function isChoiceOfType(
       // Leaving this here to make TypeScript happy, and in case that changes
       typedPropertyValue = typedPropertyValue[0];
     }
-    if (typedPropertyValue && key === basePropertyName + capitalize(typedPropertyValue.type)) {
+    if (key === basePropertyName + capitalize(typedPropertyValue.type)) {
       return true;
     }
   }

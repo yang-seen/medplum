@@ -423,7 +423,7 @@ export const functions: Record<string, FhirPathFunction> = {
    * @param other The atom representing the collection of elements to intersect.
    * @returns A collection containing the elements that are in both collections.
    */
-  intersect: (context: AtomContext, input: TypedValue[], other: Atom): TypedValue[] => {
+  intersect: (context: AtomContext, input: TypedValue[], other: Atom | undefined): TypedValue[] => {
     if (!other) {
       return input;
     }
@@ -449,7 +449,7 @@ export const functions: Record<string, FhirPathFunction> = {
    * @param other The atom representing the collection of elements to exclude.
    * @returns A collection containing the elements that are in the input collection but not the other collection.
    */
-  exclude: (context: AtomContext, input: TypedValue[], other: Atom): TypedValue[] => {
+  exclude: (context: AtomContext, input: TypedValue[], other: Atom | undefined): TypedValue[] => {
     if (!other) {
       return input;
     }
@@ -482,7 +482,7 @@ export const functions: Record<string, FhirPathFunction> = {
    * @param other The atom representing the collection of elements to merge.
    * @returns A collection containing the elements that represent the union of both collections.
    */
-  union: (context: AtomContext, input: TypedValue[], other: Atom): TypedValue[] => {
+  union: (context: AtomContext, input: TypedValue[], other: Atom | undefined): TypedValue[] => {
     if (!other) {
       return input;
     }
@@ -503,7 +503,7 @@ export const functions: Record<string, FhirPathFunction> = {
    * @param other The atom representing the collection of elements to merge.
    * @returns A collection containing the elements that represent the combination of both collections including duplicates.
    */
-  combine: (context: AtomContext, input: TypedValue[], other: Atom): TypedValue[] => {
+  combine: (context: AtomContext, input: TypedValue[], other: Atom | undefined): TypedValue[] => {
     if (!other) {
       return input;
     }
@@ -1753,7 +1753,7 @@ function applyMathFunc(
   return [{ type, value: returnValue }];
 }
 
-function validateInput(input: TypedValue[], count: number): TypedValue[] {
+function validateInput(input: (TypedValue | null | undefined)[], count: number): TypedValue[] {
   if (input.length !== count) {
     throw new Error(`Expected ${count} arguments`);
   }
@@ -1762,5 +1762,5 @@ function validateInput(input: TypedValue[], count: number): TypedValue[] {
       throw new Error('Expected non-null argument');
     }
   }
-  return input;
+  return input as TypedValue[];
 }

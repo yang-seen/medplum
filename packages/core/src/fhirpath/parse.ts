@@ -111,11 +111,14 @@ const FUNCTION_CALL_PARSELET: InfixParselet = {
 function parseQuantity(str: string): Quantity {
   const parts = str.split(' ');
   const value = parseFloat(parts[0]);
-  let unit = parts[1];
-  if (unit?.startsWith("'") && unit.endsWith("'")) {
-    unit = unit.substring(1, unit.length - 1);
-  } else {
-    unit = '{' + unit + '}';
+  let unit = undefined;
+  if (parts.length > 0) {
+    unit = parts[1];
+    if (unit.startsWith("'") && unit.endsWith("'")) {
+      unit = unit.substring(1, unit.length - 1);
+    } else {
+      unit = '{' + unit + '}';
+    }
   }
   return { value, unit };
 }

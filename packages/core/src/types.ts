@@ -189,7 +189,7 @@ function indexType(structureDefinition: StructureDefinition, elementDefinition: 
   parts[0] = structureDefinition.name as string;
 
   const typeName = buildTypeName(parts);
-  let typeSchema = globalSchema.types[typeName];
+  let typeSchema = globalSchema.types[typeName] as Partial<TypeSchema> | undefined;
 
   if (!typeSchema) {
     globalSchema.types[typeName] = typeSchema = {} as TypeSchema;
@@ -221,7 +221,7 @@ function indexProperty(structureDefinition: StructureDefinition, element: Elemen
   parts[0] = structureDefinition.name as string;
 
   const typeName = buildTypeName(parts.slice(0, parts.length - 1));
-  const typeSchema = globalSchema.types[typeName];
+  const typeSchema = globalSchema.types[typeName] as TypeSchema | undefined;
   if (!typeSchema) {
     return;
   }
@@ -236,8 +236,8 @@ function indexProperty(structureDefinition: StructureDefinition, element: Elemen
  */
 export function indexSearchParameterBundle(bundle: Bundle<SearchParameter>): void {
   for (const entry of bundle.entry as BundleEntry[]) {
-    const resource = entry.resource as SearchParameter;
-    if (resource.resourceType === 'SearchParameter') {
+    const resource = entry.resource;
+    if (resource?.resourceType === 'SearchParameter') {
       indexSearchParameter(resource);
     }
   }
@@ -255,7 +255,7 @@ export function indexSearchParameter(searchParam: SearchParameter): void {
   }
 
   for (const resourceType of searchParam.base) {
-    const typeSchema = globalSchema.types[resourceType];
+    const typeSchema = globalSchema.types[resourceType] as TypeSchema | undefined;
     if (!typeSchema) {
       continue;
     }
@@ -335,11 +335,11 @@ export function buildTypeName(components: string[]): string {
  * @param typeSchema The type schema to check.
  * @returns True if the type schema is a non-abstract FHIR resource.
  */
-export function isResourceTypeSchema(typeSchema: TypeSchema): boolean {
+export function isResourceTypeSchema(typeSchema: Partial<TypeSchema>): boolean {
   const structureDefinition = typeSchema.structureDefinition;
-  return (
+  return !!(
     structureDefinition &&
-    structureDefinition.name === typeSchema.elementDefinition.path &&
+    structureDefinition.name === typeSchema.elementDefinition?.path &&
     structureDefinition.kind === 'resource' &&
     !structureDefinition.abstract
   );
@@ -421,12 +421,17 @@ function capitalizeDisplayWord(word: string): string {
  * @returns The element definition if found.
  */
 export function getElementDefinition(typeName: string, propertyName: string): ElementDefinition | undefined {
-  const typeSchema = globalSchema.types[typeName];
+  const typeSchema = globalSchema.types[typeName] as Partial<TypeSchema> | undefined;
   if (!typeSchema) {
     return undefined;
   }
 
-  const property = typeSchema.properties[propertyName] ?? typeSchema.properties[propertyName + '[x]'];
+  const properties = typeSchema.properties as Record<string, ElementDefinition | undefined> | undefined;
+  if (!properties) {
+    return undefined;
+  }
+
+  const property = properties[propertyName] ?? properties[propertyName + '[x]'];
   if (!property) {
     return undefined;
   }

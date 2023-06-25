@@ -1,6 +1,6 @@
 import { Reference, Resource, SearchParameter } from '@medplum/fhirtypes';
 import { evalFhirPath } from '../fhirpath';
-import { globalSchema } from '../types';
+import { TypeSchema, globalSchema } from '../types';
 import { SearchParameterType, getSearchParameterDetails } from './details';
 import { Filter, Operator, SearchRequest } from './search';
 
@@ -32,7 +32,9 @@ export function matchesSearchRequest(resource: Resource, searchRequest: SearchRe
  * @returns True if the resource satisfies the search filter.
  */
 function matchesSearchFilter(resource: Resource, searchRequest: SearchRequest, filter: Filter): boolean {
-  const searchParam = globalSchema.types[searchRequest.resourceType].searchParams?.[filter.code];
+  const searchParam = (globalSchema.types[searchRequest.resourceType] as TypeSchema | undefined)?.searchParams?.[
+    filter.code
+  ];
   switch (searchParam?.type) {
     case 'reference':
       return matchesReferenceFilter(resource, filter, searchParam);

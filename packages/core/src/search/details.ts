@@ -1,5 +1,5 @@
 import { ElementDefinition, SearchParameter } from '@medplum/fhirtypes';
-import { buildTypeName, getElementDefinition, globalSchema, PropertyType } from '../types';
+import { buildTypeName, getElementDefinition, globalSchema, PropertyType, TypeSchema } from '../types';
 import { capitalize } from '../utils';
 
 export enum SearchParameterType {
@@ -36,8 +36,8 @@ export interface SearchParameterDetails {
  * @returns The search parameter type details.
  */
 export function getSearchParameterDetails(resourceType: string, searchParam: SearchParameter): SearchParameterDetails {
-  let result: SearchParameterDetails | undefined =
-    globalSchema.types[resourceType].searchParamsDetails?.[searchParam.code as string];
+  let result: SearchParameterDetails | undefined = (globalSchema.types[resourceType] as TypeSchema | undefined)
+    ?.searchParamsDetails?.[searchParam.code as string];
   if (!result) {
     result = buildSearchParameterDetails(resourceType, searchParam);
   }
@@ -45,7 +45,10 @@ export function getSearchParameterDetails(resourceType: string, searchParam: Sea
 }
 
 function setSearchParameterDetails(resourceType: string, code: string, details: SearchParameterDetails): void {
-  const typeSchema = globalSchema.types[resourceType];
+  const typeSchema = globalSchema.types[resourceType] as TypeSchema | undefined;
+  if (!typeSchema) {
+    throw new Error('Type schema not found');
+  }
   if (!typeSchema.searchParamsDetails) {
     typeSchema.searchParamsDetails = {};
   }

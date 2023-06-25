@@ -1,5 +1,5 @@
 import { Resource, ResourceType, SearchParameter } from '@medplum/fhirtypes';
-import { globalSchema } from '../types';
+import { TypeSchema, globalSchema } from '../types';
 import { OperationOutcomeError, badRequest } from '../outcomes';
 
 export const DEFAULT_SEARCH_COUNT = 20;
@@ -251,7 +251,7 @@ function parseKeyValue(searchRequest: SearchRequest, key: string, value: string)
       break;
 
     default: {
-      const param = globalSchema.types[searchRequest.resourceType]?.searchParams?.[code];
+      const param = (globalSchema.types[searchRequest.resourceType] as TypeSchema | undefined)?.searchParams?.[code];
       if (param) {
         parseParameter(searchRequest, param, modifier, value);
       } else {
@@ -368,7 +368,7 @@ function parseUnknownParameter(searchRequest: SearchRequest, code: string, modif
 
 function parsePrefix(input: string): { operator: Operator; value: string } {
   const prefix = input.substring(0, 2);
-  const prefixOperator = PREFIX_OPERATORS[prefix];
+  const prefixOperator = PREFIX_OPERATORS[prefix] as Operator | undefined;
   if (prefixOperator) {
     return { operator: prefixOperator, value: input.substring(2) };
   }
@@ -376,7 +376,7 @@ function parsePrefix(input: string): { operator: Operator; value: string } {
 }
 
 function parseModifier(modifier: string): Operator {
-  return MODIFIER_OPERATORS[modifier] || Operator.EQUALS;
+  return (MODIFIER_OPERATORS[modifier] as Operator | undefined) ?? Operator.EQUALS;
 }
 
 function parseIncludeTarget(input: string): IncludeTarget {
