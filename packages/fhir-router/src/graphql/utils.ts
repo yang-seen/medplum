@@ -6,7 +6,7 @@ import {
   parseSearchRequest,
   SearchRequest,
 } from '@medplum/core';
-import { OperationOutcome, Reference, Resource, ResourceType } from '@medplum/fhirtypes';
+import { OperationOutcome, Reference, Resource, ResourceType, SearchParameter } from '@medplum/fhirtypes';
 import DataLoader from 'dataloader';
 import {
   GraphQLBoolean,
@@ -142,7 +142,7 @@ export function buildSearchArgs(resourceType: string): GraphQLFieldConfigArgumen
   };
   const searchParams = getSearchParameters(resourceType);
   if (searchParams) {
-    for (const [code, searchParam] of Object.entries(searchParams)) {
+    for (const [code, searchParam] of Object.entries(searchParams) as [string, SearchParameter][]) {
       // GraphQL does not support dashes in argument names
       // So convert dashes to underscores
       args[fhirParamToGraphQLField(code)] = {

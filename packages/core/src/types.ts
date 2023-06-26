@@ -12,6 +12,8 @@ import baseSchema from './base-schema.json';
 import { SearchParameterDetails } from './search/details';
 import { capitalize } from './utils';
 
+export type StringMap<T> = Partial<Record<string, T>>;
+
 export interface TypedValue {
   readonly type: string;
   readonly value: any;
@@ -109,7 +111,7 @@ export enum PropertyType {
  *   PropertySchema - one per property/field
  */
 export interface IndexedStructureDefinition {
-  types: { [resourceType: string]: TypeSchema };
+  types: StringMap<TypeSchema>;
 }
 
 /**
@@ -125,9 +127,9 @@ export interface TypeSchema {
   structureDefinition: StructureDefinition;
   elementDefinition: ElementDefinition;
   display: string;
-  properties: { [name: string]: ElementDefinition };
-  searchParams?: { [code: string]: SearchParameter };
-  searchParamsDetails?: { [code: string]: SearchParameterDetails };
+  properties: StringMap<ElementDefinition>;
+  searchParams?: StringMap<SearchParameter>;
+  searchParamsDetails?: StringMap<SearchParameterDetails>;
   description?: string;
   parentType?: string;
 }
@@ -352,7 +354,7 @@ export function isResourceTypeSchema(typeSchema: Partial<TypeSchema>): boolean {
  */
 export function getResourceTypes(): ResourceType[] {
   const result: ResourceType[] = [];
-  for (const [resourceType, typeSchema] of Object.entries(globalSchema.types)) {
+  for (const [resourceType, typeSchema] of Object.entries(globalSchema.types) as [string, TypeSchema][]) {
     if (isResourceTypeSchema(typeSchema)) {
       result.push(resourceType as ResourceType);
     }
@@ -365,7 +367,7 @@ export function getResourceTypes(): ResourceType[] {
  * @param resourceType The resource type.
  * @returns The type schema for the resource type.
  */
-export function getResourceTypeSchema(resourceType: string): TypeSchema {
+export function getResourceTypeSchema(resourceType: string): TypeSchema | undefined {
   return globalSchema.types[resourceType];
 }
 
@@ -374,8 +376,8 @@ export function getResourceTypeSchema(resourceType: string): TypeSchema {
  * @param resourceType The resource type.
  * @returns The search parameters for the resource type indexed by search code.
  */
-export function getSearchParameters(resourceType: string): Record<string, SearchParameter> | undefined {
-  return globalSchema.types[resourceType].searchParams;
+export function getSearchParameters(resourceType: string): StringMap<SearchParameter> | undefined {
+  return globalSchema.types[resourceType]?.searchParams;
 }
 
 /**
@@ -426,7 +428,7 @@ export function getElementDefinition(typeName: string, propertyName: string): El
     return undefined;
   }
 
-  const properties = typeSchema.properties as Record<string, ElementDefinition | undefined> | undefined;
+  const properties = typeSchema.properties as StringMap<ElementDefinition | undefined> | undefined;
   if (!properties) {
     return undefined;
   }

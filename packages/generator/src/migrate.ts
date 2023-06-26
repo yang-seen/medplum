@@ -1,12 +1,12 @@
 import {
-  PropertyType,
-  SearchParameterDetails,
-  SearchParameterType,
-  TypeSchema,
   getSearchParameterDetails,
   globalSchema,
   indexStructureDefinitionBundle,
   isResourceTypeSchema,
+  PropertyType,
+  SearchParameterDetails,
+  SearchParameterType,
+  TypeSchema,
 } from '@medplum/core';
 import { readJson } from '@medplum/definitions';
 import { Bundle, SearchParameter } from '@medplum/fhirtypes';
@@ -42,7 +42,7 @@ function buildMigrationUp(b: FileBuilder): void {
   builder.append('export async function run(client: PoolClient): Promise<void> {');
   builder.indentCount++;
 
-  for (const [resourceType, typeSchema] of Object.entries(globalSchema.types)) {
+  for (const [resourceType, typeSchema] of Object.entries(globalSchema.types) as [string, TypeSchema][]) {
     buildCreateTables(b, resourceType, typeSchema);
   }
 

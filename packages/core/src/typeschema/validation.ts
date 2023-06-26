@@ -1,10 +1,10 @@
 import { OperationOutcomeIssue, Resource, StructureDefinition } from '@medplum/fhirtypes';
-import { ElementValidator, getDataType, parseStructureDefinition, InternalTypeSchema } from './types';
-import { OperationOutcomeError, validationError } from '../outcomes';
-import { PropertyType, TypedValue } from '../types';
 import { getTypedPropertyValue } from '../fhirpath';
+import { OperationOutcomeError, validationError } from '../outcomes';
 import { createStructureIssue } from '../schema';
+import { PropertyType, StringMap, TypedValue } from '../types';
 import { deepEquals, deepIncludes, isEmpty, isLowerCase } from '../utils';
+import { ElementValidator, getDataType, InternalTypeSchema, parseStructureDefinition } from './types';
 
 /*
  * This file provides schema validation utilities for FHIR JSON objects.
@@ -12,7 +12,7 @@ import { deepEquals, deepIncludes, isEmpty, isLowerCase } from '../utils';
  * See: [JSON Representation of Resources](https://hl7.org/fhir/json.html)
  * See: [FHIR Data Types](https://www.hl7.org/fhir/datatypes.html)
  */
-const fhirTypeToJsType: Record<string, string> = {
+const fhirTypeToJsType: StringMap<string> = {
   base64Binary: 'string',
   boolean: 'boolean',
   canonical: 'string',
@@ -42,7 +42,7 @@ const fhirTypeToJsType: Record<string, string> = {
  * See: [JSON Representation of Resources](https://hl7.org/fhir/json.html)
  * See: [FHIR Data Types](https://www.hl7.org/fhir/datatypes.html)
  */
-const validationRegexes: Record<string, RegExp> = {
+const validationRegexes: StringMap<RegExp> = {
   base64Binary: /^([A-Za-z\d+/]{4})*([A-Za-z\d+/]{2}==|[A-Za-z\d+/]{3}=)?$/,
   canonical: /^\S*$/,
   code: /^[^\s]+( [^\s]+)*$/,
@@ -79,13 +79,22 @@ class ResourceValidator {
     }
   }
 
-  validate(resource: Resource): void {
+  validate(resource: unknown): void {
     if (!resource) {
       throw new OperationOutcomeError(validationError('Resource is null'));
     }
-    const resourceType = resource.resourceType;
+
+    if (typeof resource !== 'object') {
+      throw new OperationOutcomeError(validationError('Resource is not an object'));
+    }
+
+    const resourceType = (resource as StringMap<unknown>).resourceType;
     if (!resourceType) {
       throw new OperationOutcomeError(validationError('Missing resource type'));
+    }
+
+    if (typeof resourceType !== 'string') {
+      throw new OperationOutcomeError(validationError('Resource type must be a string'));
     }
 
     this.validateObject({ type: resourceType, value: resource }, this.schema, resourceType);
@@ -171,10 +180,10 @@ class ResourceValidator {
 
   private checkAdditionalProperties(
     typedValue: TypedValue,
-    properties: Record<string, ElementValidator>,
+    properties: StringMap<ElementValidator>,
     path: string
   ): void {
-    const object = typedValue.value as Record<string, unknown>;
+    const object = typedValue.value as StringMap<unknown>;
     for (const key of Object.keys(object)) {
       if (key === 'resourceType') {
         continue; // Skip special resource type discriminator property in JSON
@@ -270,7 +279,7 @@ function isIntegerType(propertyType: PropertyType): boolean {
 function isChoiceOfType(
   typedValue: TypedValue,
   key: string,
-  propertyDefinitions: Record<string, ElementValidator>
+  propertyDefinitions: StringMap<ElementValidator>
 ): boolean {
   const parts = key.split(/(?=[A-Z])/g); // Split before capital letters
   let testProperty = '';

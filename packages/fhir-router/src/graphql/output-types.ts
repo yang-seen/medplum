@@ -13,8 +13,16 @@ import {
   OperationOutcomeError,
   toJsBoolean,
   toTypedValue,
+  TypeSchema,
 } from '@medplum/core';
-import { ElementDefinition, ElementDefinitionType, Reference, Resource, ResourceType } from '@medplum/fhirtypes';
+import {
+  ElementDefinition,
+  ElementDefinitionType,
+  Reference,
+  Resource,
+  ResourceType,
+  SearchParameter,
+} from '@medplum/fhirtypes';
 import {
   GraphQLEnumType,
   GraphQLEnumValueConfigMap,
@@ -54,7 +62,7 @@ export function buildGraphQLOutputType(resourceType: string): GraphQLOutputType 
     });
   }
 
-  const schema = getResourceTypeSchema(resourceType);
+  const schema = getResourceTypeSchema(resourceType) as TypeSchema;
   return new GraphQLObjectType({
     name: resourceType,
     description: schema.description,
@@ -70,7 +78,7 @@ function buildGraphQLOutputFields(resourceType: ResourceType): GraphQLFieldConfi
 }
 
 function buildOutputPropertyFields(resourceType: string, fields: GraphQLFieldConfigMap<any, any>): void {
-  const schema = getResourceTypeSchema(resourceType);
+  const schema = getResourceTypeSchema(resourceType) as TypeSchema;
   const properties = schema.properties;
 
   if (isResourceTypeSchema(schema)) {
@@ -154,13 +162,11 @@ function buildListPropertyFieldArgs(fieldTypeName: string): GraphQLFieldConfigAr
     };
 
     // Add all "string" and "code" properties as arguments
-    const fieldTypeSchema = globalSchema.types[fieldTypeName];
-    if (fieldTypeSchema.properties) {
-      for (const fieldKey of Object.keys(fieldTypeSchema.properties)) {
-        const fieldElementDefinition = getElementDefinition(fieldTypeName, fieldKey) as ElementDefinition;
-        for (const type of fieldElementDefinition.type as ElementDefinitionType[]) {
-          buildListPropertyFieldArg(fieldArgs, fieldKey, fieldElementDefinition, type);
-        }
+    const fieldTypeSchema = globalSchema.types[fieldTypeName] as TypeSchema;
+    for (const fieldKey of Object.keys(fieldTypeSchema.properties)) {
+      const fieldElementDefinition = getElementDefinition(fieldTypeName, fieldKey) as ElementDefinition;
+      for (const type of fieldElementDefinition.type as ElementDefinitionType[]) {
+        buildListPropertyFieldArg(fieldArgs, fieldKey, fieldElementDefinition, type);
       }
     }
   }
@@ -235,7 +241,7 @@ function buildReverseLookupFields(resourceType: ResourceType, fields: GraphQLFie
     const enumValues: GraphQLEnumValueConfigMap = {};
     let count = 0;
     if (childSearchParams) {
-      for (const [code, searchParam] of Object.entries(childSearchParams)) {
+      for (const [code, searchParam] of Object.entries(childSearchParams) as [string, SearchParameter][]) {
         if (searchParam.target?.includes(resourceType)) {
           enumValues[fhirParamToGraphQLField(code)] = { value: code };
           count++;

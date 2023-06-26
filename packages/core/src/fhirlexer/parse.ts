@@ -1,9 +1,9 @@
-import { TypedValue } from '../types';
+import { StringMap, TypedValue } from '../types';
 import { Token } from './tokenize';
 
 export interface AtomContext {
   parent?: AtomContext;
-  variables: Record<string, TypedValue | undefined>;
+  variables: StringMap<TypedValue | undefined>;
 }
 export interface Atom {
   eval(context: AtomContext, input: TypedValue[]): TypedValue[];
@@ -41,8 +41,8 @@ export interface InfixParselet {
 }
 
 export class ParserBuilder {
-  private readonly prefixParselets: Record<string, PrefixParselet> = {};
-  private readonly infixParselets: Record<string, InfixParselet> = {};
+  private readonly prefixParselets: StringMap<PrefixParselet> = {};
+  private readonly infixParselets: StringMap<InfixParselet> = {};
 
   public registerInfix(tokenType: string, parselet: InfixParselet): this {
     this.infixParselets[tokenType] = parselet;
@@ -84,14 +84,10 @@ export class ParserBuilder {
 
 export class Parser {
   private tokens: Token[];
-  private prefixParselets: Record<string, PrefixParselet | undefined>;
-  private infixParselets: Record<string, InfixParselet>;
+  private prefixParselets: StringMap<PrefixParselet | undefined>;
+  private infixParselets: StringMap<InfixParselet>;
 
-  constructor(
-    tokens: Token[],
-    prefixParselets: Record<string, PrefixParselet>,
-    infixParselets: Record<string, InfixParselet>
-  ) {
+  constructor(tokens: Token[], prefixParselets: StringMap<PrefixParselet>, infixParselets: StringMap<InfixParselet>) {
     this.tokens = tokens;
     this.prefixParselets = prefixParselets;
     this.infixParselets = infixParselets;

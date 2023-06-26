@@ -252,7 +252,7 @@ describe('MockClient', () => {
     const schema = await client.requestSchema('Patient');
     expect(schema).toBeDefined();
     expect(schema.types['Patient']).toBeDefined();
-    expect(schema.types['Patient'].searchParams).toBeDefined();
+    expect(schema.types['Patient']?.searchParams).toBeDefined();
   });
 
   test('Get cached schema', async () => {

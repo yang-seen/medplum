@@ -11,6 +11,7 @@ import {
   Range,
   Timing,
 } from '@medplum/fhirtypes';
+import { StringMap } from './types';
 import { capitalize } from './utils';
 
 export interface AddressFormatOptions {
@@ -212,7 +213,7 @@ export function formatPeriod(
   return formatDateTime(period.start, locales, options) + ' - ' + formatDateTime(period.end, locales, options);
 }
 
-const unitAdverbForm: Record<string, string> = {
+const unitAdverbForm: StringMap<string> = {
   s: 'every second',
   min: 'every minute',
   h: 'hourly',
@@ -222,7 +223,7 @@ const unitAdverbForm: Record<string, string> = {
   a: 'annually',
 };
 
-const singularUnits: Record<string, string> = {
+const singularUnits: StringMap<string> = {
   s: 'second',
   min: 'minute',
   h: 'hour',
@@ -232,7 +233,7 @@ const singularUnits: Record<string, string> = {
   a: 'year',
 };
 
-const pluralUnits: Record<string, string> = {
+const pluralUnits: StringMap<string> = {
   s: 'seconds',
   min: 'minutes',
   h: 'hours',
@@ -260,7 +261,7 @@ export function formatTiming(timing: Timing | undefined): string {
     const periodUnit = timing.repeat.periodUnit;
 
     if (frequency === 1 && period === 1) {
-      builder.push(unitAdverbForm[periodUnit]);
+      builder.push(unitAdverbForm[periodUnit] ?? periodUnit);
     } else {
       if (frequency === 1) {
         builder.push('once');

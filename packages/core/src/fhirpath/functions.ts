@@ -19,7 +19,7 @@ export type FhirPathFunction = (context: AtomContext, input: TypedValue[], ...ar
  */
 const stub: FhirPathFunction = (): [] => [];
 
-export const functions: Record<string, FhirPathFunction> = {
+export const functions = {
   /*
    * 5.1 Existence
    * See: https://hl7.org/fhirpath/#existence

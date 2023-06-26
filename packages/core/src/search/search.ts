@@ -1,6 +1,6 @@
 import { Resource, ResourceType, SearchParameter } from '@medplum/fhirtypes';
-import { TypeSchema, globalSchema } from '../types';
-import { OperationOutcomeError, badRequest } from '../outcomes';
+import { badRequest, OperationOutcomeError } from '../outcomes';
+import { globalSchema, StringMap, TypeSchema } from '../types';
 
 export const DEFAULT_SEARCH_COUNT = 20;
 
@@ -85,7 +85,7 @@ export enum Operator {
  * The modifiers are separated from the parameter name by a colon.
  * See: https://www.hl7.org/fhir/search.html#modifiers
  */
-const MODIFIER_OPERATORS: Record<string, Operator> = {
+const MODIFIER_OPERATORS: StringMap<Operator> = {
   contains: Operator.CONTAINS,
   exact: Operator.EXACT,
   above: Operator.ABOVE,
@@ -106,7 +106,7 @@ const MODIFIER_OPERATORS: Record<string, Operator> = {
  * of the matching.
  * See: https://www.hl7.org/fhir/search.html#prefix
  */
-const PREFIX_OPERATORS: Record<string, Operator> = {
+const PREFIX_OPERATORS: StringMap<Operator> = {
   eq: Operator.EQUALS,
   ne: Operator.NOT_EQUALS,
   lt: Operator.LESS_THAN,
@@ -126,7 +126,7 @@ const PREFIX_OPERATORS: Record<string, Operator> = {
  */
 export function parseSearchRequest<T extends Resource = Resource>(
   resourceType: T['resourceType'],
-  query: Record<string, string[] | string | undefined>
+  query: StringMap<string[] | string | undefined>
 ): SearchRequest<T> {
   const queryArray: [string, string][] = [];
   for (const [key, value] of Object.entries(query)) {

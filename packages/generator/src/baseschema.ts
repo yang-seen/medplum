@@ -14,14 +14,14 @@ export function main(): void {
   indexStructureDefinitionBundle(readJson('fhir/r4/profiles-medplum.json') as Bundle);
 
   // Remove all primitive types and resource types
-  for (const [typeName, typeSchema] of Object.entries(globalSchema.types)) {
+  for (const [typeName, typeSchema] of Object.entries(globalSchema.types) as [string, TypeSchema][]) {
     if (isLowerCase(typeName.charAt(0)) || typeSchema.structureDefinition.kind === 'resource') {
       delete globalSchema.types[typeName];
     }
   }
 
   // For each type schema, only keep "display" and "properties"
-  for (const [typeName, typeSchema] of Object.entries(globalSchema.types)) {
+  for (const [typeName, typeSchema] of Object.entries(globalSchema.types) as [string, TypeSchema][]) {
     globalSchema.types[typeName] = {
       display: typeSchema.display,
       properties: typeSchema.properties,
@@ -30,7 +30,10 @@ export function main(): void {
     // For each property, only keep "min", "max", and "type"
     // Only keep "min" if not 0
     // Only keep "max" if not 1
-    for (const [propertyName, propertySchema] of Object.entries(typeSchema.properties)) {
+    for (const [propertyName, propertySchema] of Object.entries(typeSchema.properties) as [
+      string,
+      ElementDefinition
+    ][]) {
       const outputPropertySchema: Partial<ElementDefinition> = {};
 
       if (propertySchema.min !== 0) {
@@ -47,7 +50,7 @@ export function main(): void {
         code: normalizedTypes[t.code as string] || t.code,
       }));
 
-      globalSchema.types[typeName].properties[propertyName] = outputPropertySchema;
+      (globalSchema.types[typeName] as TypeSchema).properties[propertyName] = outputPropertySchema;
     }
   }
 

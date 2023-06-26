@@ -31,8 +31,8 @@ describe('FHIR resource and data type representations', () => {
       'obs-7',
       'vs-2',
     ]);
-    expect(profile.fields['status'].binding).toEqual('http://hl7.org/fhir/ValueSet/observation-status|4.0.1');
-    expect(profile.fields['code'].pattern).toMatchObject<TypedValue>({
+    expect(profile.fields['status']?.binding).toEqual('http://hl7.org/fhir/ValueSet/observation-status|4.0.1');
+    expect(profile.fields['code']?.pattern).toMatchObject<TypedValue>({
       type: 'CodeableConcept',
       value: {
         coding: [
@@ -43,7 +43,7 @@ describe('FHIR resource and data type representations', () => {
         ],
       },
     });
-    expect(profile.fields['category'].slicing).toMatchObject<SlicingRules>({
+    expect(profile.fields['category']?.slicing).toMatchObject<SlicingRules>({
       discriminator: [
         { type: 'value', path: 'coding.code' },
         { type: 'value', path: 'coding.system' },
@@ -75,8 +75,8 @@ describe('FHIR resource and data type representations', () => {
       min: 2,
       max: Number.POSITIVE_INFINITY,
     });
-    expect(profile.fields['component'].constraints.map((c) => c.key).sort()).toEqual(['ele-1', 'vs-3']);
-    expect(profile.fields['component'].slicing).toMatchObject<SlicingRules>({
+    expect(profile.fields['component']?.constraints.map((c) => c.key).sort()).toEqual(['ele-1', 'vs-3']);
+    expect(profile.fields['component']?.slicing).toMatchObject<SlicingRules>({
       discriminator: [{ type: 'pattern', path: 'code' }],
       slices: [
         {

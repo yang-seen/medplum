@@ -53,8 +53,8 @@ describe('Type Utils', () => {
       },
     });
     expect(globalSchema.types['Patient']).toBeDefined();
-    expect(globalSchema.types['Patient'].properties).toBeDefined();
-    expect(globalSchema.types['Patient'].properties['name']).toBeDefined();
+    expect(globalSchema.types['Patient']?.properties).toBeDefined();
+    expect(globalSchema.types['Patient']?.properties['name']).toBeDefined();
     expect(getResourceTypes()).toContain('Patient');
     expect(getResourceTypeSchema('Patient')).toBeDefined();
 
@@ -75,12 +75,12 @@ describe('Type Utils', () => {
       type: 'string',
       expression: 'Patient.name',
     });
-    expect(globalSchema.types['Patient'].searchParams?.['name']).toBeDefined();
+    expect(globalSchema.types['Patient']?.searchParams?.['name']).toBeDefined();
     expect(getSearchParameters('Patient')).toBeDefined();
 
     // Expect base search parameters to be indexed
-    expect(globalSchema.types['Patient'].searchParams?.['_id']).toBeDefined();
-    expect(globalSchema.types['Patient'].searchParams?.['_lastUpdated']).toBeDefined();
+    expect(globalSchema.types['Patient']?.searchParams?.['_id']).toBeDefined();
+    expect(globalSchema.types['Patient']?.searchParams?.['_lastUpdated']).toBeDefined();
 
     // Index again and silently ignore
     indexSearchParameter({
@@ -92,7 +92,7 @@ describe('Type Utils', () => {
       type: 'string',
       expression: 'Patient.name',
     });
-    expect(globalSchema.types['Patient'].searchParams?.['name']).toBeDefined();
+    expect(globalSchema.types['Patient']?.searchParams?.['name']).toBeDefined();
   });
 
   test('getPropertyDisplayName', () => {
@@ -150,10 +150,10 @@ describe('Type Utils', () => {
     });
 
     expect(globalSchema.types['Patient']).toBeDefined();
-    expect(isResourceTypeSchema(globalSchema.types['Patient'])).toBeTruthy();
+    expect(isResourceTypeSchema(globalSchema.types['Patient'] as TypeSchema)).toBeTruthy();
 
     expect(globalSchema.types['PatientContact']).toBeDefined();
-    expect(isResourceTypeSchema(globalSchema.types['PatientContact'])).toBeFalsy();
+    expect(isResourceTypeSchema(globalSchema.types['PatientContact'] as TypeSchema)).toBeFalsy();
 
     expect(
       isResourceTypeSchema({

@@ -55,7 +55,7 @@ export function main(): void {
   const fhirSchema = readJson('fhir/r4/fhir.schema.json') as FhirSchema;
 
   // Then add element types
-  for (const typeSchema of Object.values(globalSchema.types)) {
+  for (const typeSchema of Object.values(globalSchema.types) as TypeSchema[]) {
     const typeName = buildTypeName((typeSchema.elementDefinition.path as string).split('.'));
     if (typeSchema.structureDefinition.url?.startsWith('https://medplum.com/fhir/StructureDefinition/')) {
       if (
@@ -130,7 +130,7 @@ function buildProperties(typeSchema: TypeSchema): {
   }
 
   for (const elementName of Object.keys(typeSchema.properties)) {
-    let elementDefinition = typeSchema.properties[elementName];
+    let elementDefinition = typeSchema.properties[elementName] as ElementDefinition;
 
     if (elementDefinition.contentReference) {
       const contentReference = elementDefinition.contentReference.substring(1).split('.');

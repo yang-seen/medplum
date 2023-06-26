@@ -181,10 +181,9 @@ function writeDocs(definitions: ResourceDocsProps[], location: DocumentationLoca
 }
 
 function filterDefinitions(bundle: Bundle): StructureDefinition[] {
-  const definitions: StructureDefinition[] =
-    bundle.entry
-      ?.map((e) => e.resource as StructureDefinition)
-      .filter((definition) => definition.resourceType === 'StructureDefinition') || [];
+  const definitions = (bundle.entry
+    ?.map((e) => e.resource)
+    .filter((definition) => definition?.resourceType === 'StructureDefinition') ?? []) as StructureDefinition[];
 
   return definitions.filter(
     (definition) =>

@@ -1,7 +1,8 @@
 import { Parser } from '../fhirlexer';
 import { initFhirPathParserBuilder } from '../fhirpath';
-import { OperationOutcomeError, badRequest } from '../outcomes';
+import { badRequest, OperationOutcomeError } from '../outcomes';
 import { Operator } from '../search/search';
+import { StringMap } from '../types';
 import { tokenize } from './tokenize';
 import { FhirFilterComparison, FhirFilterConnective, FhirFilterExpression, FhirFilterNegation } from './types';
 
@@ -9,7 +10,7 @@ import { FhirFilterComparison, FhirFilterConnective, FhirFilterExpression, FhirF
  * The operatorMap maps FHIR _filter operators to Medplum search operators.
  * See _filter operators: https://www.hl7.org/fhir/search_filter.html#ops
  */
-const operatorMap: Record<string, Operator | undefined> = {
+const operatorMap: StringMap<Operator | undefined> = {
   // eq - an item in the set has an equal value
   eq: Operator.EQUALS,
   // ne - An item in the set has an unequal value

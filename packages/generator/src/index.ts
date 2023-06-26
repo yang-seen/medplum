@@ -21,7 +21,7 @@ export function main(): void {
   indexStructureDefinitionBundle(readJson('fhir/r4/profiles-resources.json') as Bundle);
   indexStructureDefinitionBundle(readJson('fhir/r4/profiles-medplum.json') as Bundle);
 
-  for (const fhirType of Object.values(globalSchema.types)) {
+  for (const fhirType of Object.values(globalSchema.types) as TypeSchema[]) {
     if (fhirType.parentType) {
       subTypesMap.set(fhirType.parentType, [...(subTypesMap.get(fhirType.parentType) || []), fhirType]);
     }
@@ -32,7 +32,7 @@ export function main(): void {
   writeResourceFile();
   writeResourceTypeFile();
 
-  for (const type of Object.values(globalSchema.types)) {
+  for (const type of Object.values(globalSchema.types) as TypeSchema[]) {
     if (isResourceTypeSchema(type)) {
       writeInterfaceFile(type);
     }
@@ -40,7 +40,7 @@ export function main(): void {
 }
 
 function writeIndexFile(): void {
-  const names = Object.values(globalSchema.types)
+  const names = (Object.values(globalSchema.types) as TypeSchema[])
     .filter(
       (t) => t.structureDefinition.name !== 'DomainResource' && !t.parentType && !isLowerCase(t.display.charAt(0))
     )
@@ -56,7 +56,7 @@ function writeIndexFile(): void {
 }
 
 function writeResourceFile(): void {
-  const names = Object.values(globalSchema.types)
+  const names = (Object.values(globalSchema.types) as TypeSchema[])
     .filter(isResourceTypeSchema)
     .map((t) => t.structureDefinition.name as string)
     .sort();
@@ -132,7 +132,7 @@ function writeInterface(b: FileBuilder, fhirType: TypeSchema): void {
     b.append(`readonly resourceType: '${typeName}';`);
   }
 
-  for (const property of Object.values(fhirType.properties)) {
+  for (const property of Object.values(fhirType.properties) as ElementDefinition[]) {
     if (property.max === '0') {
       continue;
     }
@@ -171,7 +171,7 @@ function buildImports(fhirType: TypeSchema, includedTypes: Set<string>, referenc
   const typeName = buildTypeName((fhirType.elementDefinition.path as string).split('.'));
   includedTypes.add(typeName);
 
-  for (const property of Object.values(fhirType.properties)) {
+  for (const property of Object.values(fhirType.properties) as ElementDefinition[]) {
     for (const typeScriptProperty of getTypeScriptProperties(property)) {
       cleanReferencedType(typeScriptProperty.typeName).forEach((cleanName) => referencedTypes.add(cleanName));
     }

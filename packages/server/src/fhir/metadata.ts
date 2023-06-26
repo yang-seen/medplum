@@ -1,4 +1,4 @@
-import { isResourceType, TypeSchema } from '@medplum/core';
+import { isResourceType, StringMap, TypeSchema } from '@medplum/core';
 import {
   CapabilityStatement,
   CapabilityStatementRest,
@@ -66,7 +66,7 @@ const baseStmt: CapabilityStatement = {
  *
  * See: https://www.hl7.org/fhir/capabilitystatement-definitions.html#CapabilityStatement.rest.resource.supportedProfile
  */
-const supportedProfiles: Record<string, string[]> = {
+const supportedProfiles: StringMap<string[]> = {
   AllergyIntolerance: ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance'],
   CarePlan: ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-careplan'],
   CareTeam: ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-careteam'],
@@ -105,7 +105,7 @@ const supportedProfiles: Record<string, string[]> = {
   Provenance: ['http://hl7.org/fhir/us/core/StructureDefinition/us-core-provenance'],
 };
 
-const supportedOperations: Record<string, CapabilityStatementRestResourceOperation[]> = {
+const supportedOperations: StringMap<CapabilityStatementRestResourceOperation[]> = {
   Group: [
     {
       name: 'export',
@@ -179,7 +179,7 @@ function buildSecurity(config: MedplumServerConfig): CapabilityStatementRestSecu
 
 function buildResourceTypes(): CapabilityStatementRestResource[] {
   const schema = getStructureDefinitions();
-  return Object.entries(schema.types)
+  return (Object.entries(schema.types) as [string, TypeSchema][])
     .filter(
       ([resourceType, typeSchema]) =>
         isResourceType(resourceType) &&

@@ -46,7 +46,13 @@ import {
 } from './outcomes';
 import { ReadablePromise } from './readablepromise';
 import { ClientStorage } from './storage';
-import { globalSchema, IndexedStructureDefinition, indexSearchParameter, indexStructureDefinition } from './types';
+import {
+  globalSchema,
+  IndexedStructureDefinition,
+  indexSearchParameter,
+  indexStructureDefinition,
+  StringMap,
+} from './types';
 import { arrayBufferToBase64, createReference, ProfileResource } from './utils';
 
 export const MEDPLUM_VERSION = process.env.MEDPLUM_VERSION ?? '';
@@ -244,7 +250,7 @@ export interface FetchLike {
  * Web browsers and Node.js automatically coerce values to strings.
  * See: https://github.com/microsoft/TypeScript/issues/32951
  */
-export type QueryTypes = URLSearchParams | string[][] | Record<string, any> | string | undefined;
+export type QueryTypes = URLSearchParams | string[][] | StringMap<any> | string | undefined;
 
 export interface CreatePdfFunction {
   (
@@ -340,10 +346,10 @@ export interface TokenResponse {
   readonly profile: Reference<ProfileResource>;
 }
 
-export interface BotEvent<T = Resource | Hl7Message | string | Record<string, any>> {
+export interface BotEvent<T = Resource | Hl7Message | string | StringMap<any>> {
   readonly contentType: string;
   readonly input: T;
-  readonly secrets: Record<string, ProjectSecret>;
+  readonly secrets: StringMap<ProjectSecret>;
 }
 
 export interface InviteBody {
@@ -1533,6 +1539,9 @@ export class MedplumClient extends EventTarget {
    * @returns The result of the create operation.
    */
   createResource<T extends Resource>(resource: T, options?: RequestInit): Promise<T> {
+    if (!(resource as any).resourceType) {
+      throw new Error('Missing resourceType');
+    }
     this.invalidateSearches(resource.resourceType);
     return this.post(this.fhirUrl(resource.resourceType), resource, undefined, options);
   }
@@ -1762,6 +1771,9 @@ export class MedplumClient extends EventTarget {
    * @returns The result of the update operation.
    */
   async updateResource<T extends Resource>(resource: T, options?: RequestInit): Promise<T> {
+    if (!(resource as any).resourceType) {
+      throw new Error('Missing resourceType');
+    }
     if (!resource.id) {
       throw new Error('Missing id');
     }
@@ -2294,7 +2306,7 @@ export class MedplumClient extends EventTarget {
   async startAsyncRequest<T>(url: string, options: RequestInit = {}): Promise<T> {
     this.addFetchOptionsDefaults(options);
 
-    const headers = options.headers as Record<string, string>;
+    const headers = options.headers as StringMap<string>;
     headers['Prefer'] = 'respond-async';
 
     const response = await this.fetchWithRetry(url, options);
@@ -2570,7 +2582,7 @@ export class MedplumClient extends EventTarget {
     if (!options.headers) {
       options.headers = {};
     }
-    const headers = options.headers as Record<string, string>;
+    const headers = options.headers as StringMap<string>;
     headers['Content-Type'] = contentType;
   }
 
@@ -2771,7 +2783,7 @@ export class MedplumClient extends EventTarget {
       body: formBody,
       credentials: 'include',
     };
-    const headers = options.headers as Record<string, string>;
+    const headers = options.headers as StringMap<string>;
 
     if (this.basicAuth) {
       headers['Authorization'] = `Basic ${this.basicAuth}`;

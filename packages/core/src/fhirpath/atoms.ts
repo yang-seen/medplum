@@ -1,6 +1,6 @@
 import { Atom, AtomContext, InfixOperatorAtom, PrefixOperatorAtom } from '../fhirlexer';
-import { PropertyType, TypedValue, isResource } from '../types';
-import { functions } from './functions';
+import { isResource, PropertyType, StringMap, TypedValue } from '../types';
+import { FhirPathFunction, functions } from './functions';
 import {
   booleanToTypedValue,
   fhirPathArrayEquals,
@@ -355,10 +355,10 @@ export class XorAtom extends InfixOperatorAtom {
 export class FunctionAtom implements Atom {
   constructor(public readonly name: string, public readonly args: Atom[]) {}
   eval(context: AtomContext, input: TypedValue[]): TypedValue[] {
-    if (!(this.name in functions)) {
+    const impl = (functions as StringMap<FhirPathFunction>)[this.name];
+    if (!impl) {
       throw new Error('Unrecognized function: ' + this.name);
     }
-    const impl = functions[this.name];
     return impl(context, input, ...this.args);
   }
 

@@ -577,15 +577,15 @@ describe('FHIRPath functions', () => {
   // 5.9. Utility functions
 
   test('now', () => {
-    expect(functions.now(context, [])[0]).toBeDefined();
+    expect(functions.now()[0]).toBeDefined();
   });
 
   test('timeOfDay', () => {
-    expect(functions.timeOfDay(context, [])[0]).toBeDefined();
+    expect(functions.timeOfDay()[0]).toBeDefined();
   });
 
   test('today', () => {
-    expect(functions.today(context, [])[0]).toBeDefined();
+    expect(functions.today()[0]).toBeDefined();
   });
 
   test('between', () => {

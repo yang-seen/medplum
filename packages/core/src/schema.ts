@@ -1,7 +1,7 @@
 import { ElementDefinition, OperationOutcomeIssue, ResourceType } from '@medplum/fhirtypes';
 import { getTypedPropertyValue, toTypedValue } from './fhirpath';
 import { OperationOutcomeError, validationError } from './outcomes';
-import { PropertyType, TypeSchema, TypedValue, globalSchema } from './types';
+import { globalSchema, PropertyType, StringMap, TypedValue, TypeSchema } from './types';
 import { capitalize, getExtensionValue, isEmpty, isLowerCase } from './utils';
 
 /*
@@ -10,7 +10,7 @@ import { capitalize, getExtensionValue, isEmpty, isLowerCase } from './utils';
  * See: [JSON Representation of Resources](https://hl7.org/fhir/json.html)
  * See: [FHIR Data Types](https://www.hl7.org/fhir/datatypes.html)
  */
-const fhirTypeToJsType: Record<string, string> = {
+const fhirTypeToJsType: StringMap<string> = {
   base64Binary: 'string',
   boolean: 'boolean',
   canonical: 'string',
@@ -185,7 +185,7 @@ export class FhirSchemaValidator {
       throw new OperationOutcomeError(validationError('Resource is not an object'));
     }
 
-    const resourceType = (resource as Record<string, unknown>).resourceType;
+    const resourceType = (resource as StringMap<unknown>).resourceType;
     if (!resourceType) {
       throw new OperationOutcomeError(validationError('Missing resource type'));
     }
@@ -220,10 +220,10 @@ export class FhirSchemaValidator {
 
   private checkProperties(
     path: string,
-    propertyDefinitions: Record<string, ElementDefinition>,
+    propertyDefinitions: StringMap<ElementDefinition>,
     typedValue: TypedValue
   ): void {
-    for (const [key, elementDefinition] of Object.entries(propertyDefinitions)) {
+    for (const [key, elementDefinition] of Object.entries(propertyDefinitions) as [string, ElementDefinition][]) {
       this.checkProperty(path + '.' + key, elementDefinition, typedValue);
     }
   }
@@ -333,9 +333,9 @@ export class FhirSchemaValidator {
   private checkAdditionalProperties(
     path: string,
     typedValue: TypedValue,
-    propertyDefinitions: Record<string, ElementDefinition>
+    propertyDefinitions: StringMap<ElementDefinition>
   ): void {
-    const object = typedValue.value as Record<string, unknown>;
+    const object = typedValue.value as StringMap<unknown>;
     for (const key of Object.keys(object)) {
       this.checkAdditionalProperty(path, key, typedValue, propertyDefinitions);
     }
@@ -352,7 +352,7 @@ export class FhirSchemaValidator {
     path: string,
     key: string,
     typedValue: TypedValue,
-    propertyDefinitions: Record<string, ElementDefinition>
+    propertyDefinitions: StringMap<ElementDefinition>
   ): void {
     if (
       !baseResourceProperties.has(key) &&
@@ -411,7 +411,7 @@ function isIntegerType(propertyType: PropertyType): boolean {
 function isChoiceOfType(
   key: string,
   typedValue: TypedValue,
-  propertyDefinitions: Record<string, ElementDefinition>
+  propertyDefinitions: StringMap<ElementDefinition>
 ): boolean {
   for (const propertyName of Object.keys(propertyDefinitions)) {
     if (!propertyName.endsWith('[x]')) {
@@ -451,7 +451,7 @@ export function checkForNull(value: unknown, path: string, issues: OperationOutc
   } else if (Array.isArray(value)) {
     checkArrayForNull(value, path, issues);
   } else if (typeof value === 'object') {
-    checkObjectForNull(value as Record<string, unknown>, path, issues);
+    checkObjectForNull(value as StringMap<unknown>, path, issues);
   }
 }
 
@@ -465,7 +465,7 @@ function checkArrayForNull(array: unknown[], path: string, issues: OperationOutc
   }
 }
 
-function checkObjectForNull(obj: Record<string, unknown>, path: string, issues: OperationOutcomeIssue[]): void {
+function checkObjectForNull(obj: StringMap<unknown>, path: string, issues: OperationOutcomeIssue[]): void {
   for (const [key, value] of Object.entries(obj)) {
     checkForNull(value, `${path}${path ? '.' : ''}${key}`, issues);
   }

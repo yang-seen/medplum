@@ -1,7 +1,7 @@
 import { Bundle, ElementDefinition, ResourceType, StructureDefinition } from '@medplum/fhirtypes';
 import { getTypedPropertyValue } from '../fhirpath';
 import { OperationOutcomeError, serverError } from '../outcomes';
-import { TypedValue } from '../types';
+import { StringMap, TypedValue } from '../types';
 import { capitalize, isEmpty } from '../utils';
 
 /**
@@ -9,7 +9,7 @@ import { capitalize, isEmpty } from '../utils';
  */
 export interface InternalTypeSchema {
   name: string;
-  fields: Record<string, ElementValidator>;
+  fields: StringMap<ElementValidator>;
   constraints: Constraint[];
   innerTypes: InternalTypeSchema[];
 }
@@ -47,7 +47,7 @@ export interface SlicingRules {
 
 export interface SliceDefinition {
   name: string;
-  fields: Record<string, ElementValidator>;
+  fields: StringMap<ElementValidator>;
   min: number;
   max: number;
 }
@@ -68,7 +68,7 @@ export function parseStructureDefinition(sd: StructureDefinition): InternalTypeS
   return new StructureDefinitionParser(sd).parse();
 }
 
-const DATA_TYPES: Record<string, InternalTypeSchema> = Object.create(null);
+const DATA_TYPES: StringMap<InternalTypeSchema> = Object.create(null);
 
 export function loadDataTypes(bundle: Bundle): void {
   for (const { resource: sd } of bundle.entry ?? []) {
@@ -105,7 +105,7 @@ interface BackboneContext {
  */
 class StructureDefinitionParser {
   private readonly elements: ElementDefinition[];
-  private readonly elementIndex: Record<string, ElementDefinition>;
+  private readonly elementIndex: StringMap<ElementDefinition>;
   private index: number;
   private readonly resourceSchema: InternalTypeSchema;
   private slicingContext: { field: SlicingRules; current?: SliceDefinition; path: string } | undefined;

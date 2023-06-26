@@ -1,4 +1,11 @@
-import { buildTypeName, capitalize, getElementDefinition, getResourceTypeSchema, isResourceType } from '@medplum/core';
+import {
+  buildTypeName,
+  capitalize,
+  getElementDefinition,
+  getResourceTypeSchema,
+  isResourceType,
+  TypeSchema,
+} from '@medplum/core';
 import { ElementDefinition, ElementDefinitionType, ResourceType } from '@medplum/fhirtypes';
 import {
   GraphQLInputFieldConfig,
@@ -26,7 +33,7 @@ export function getGraphQLInputType(inputType: string, nameSuffix: string): Grap
 }
 
 function buildGraphQLInputType(resourceType: string, nameSuffix: string): GraphQLInputType {
-  const schema = getResourceTypeSchema(resourceType);
+  const schema = getResourceTypeSchema(resourceType) as TypeSchema;
   return new GraphQLInputObjectType({
     name: resourceType + nameSuffix,
     description: schema.description,
@@ -51,7 +58,7 @@ function buildGraphQLInputFields(resourceType: ResourceType, nameSuffix: string)
 }
 
 function buildInputPropertyFields(resourceType: string, fields: GraphQLInputFieldConfigMap, nameSuffix: string): void {
-  const schema = getResourceTypeSchema(resourceType);
+  const schema = getResourceTypeSchema(resourceType) as TypeSchema;
   const properties = schema.properties;
   for (const key of Object.keys(properties)) {
     const elementDefinition = getElementDefinition(resourceType, key) as ElementDefinition;
