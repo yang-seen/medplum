@@ -288,7 +288,7 @@ function getTypeScriptTypeForProperty(property: ElementDefinition, typeDefinitio
           property.binding.valueSet !== 'http://hl7.org/fhir/ValueSet/defined-types|4.0.1'
         ) {
           const values = getValueSetValues(property.binding.valueSet);
-          if (values && values.length > 0) {
+          if (values.length > 0) {
             baseType = "'" + values.join("' | '") + "'";
           }
         }

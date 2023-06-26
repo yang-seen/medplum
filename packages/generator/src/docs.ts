@@ -53,10 +53,12 @@ function indexSearchParameters(searchParams: Bundle): Record<string, SearchParam
   for (const entry of entries) {
     const searchParam = entry.resource as SearchParameter;
     for (const resType of searchParam.base || []) {
-      if (!results[resType]) {
-        results[resType] = [];
+      let array = results[resType] as SearchParameter[] | undefined;
+      if (!array) {
+        array = [];
+        results[resType] = array;
       }
-      results[resType].push(searchParam);
+      array.push(searchParam);
     }
   }
   return results;
@@ -106,7 +108,7 @@ function buildDocsDefinition(
   }
 
   if (searchParameters) {
-    result.searchParameters = (searchParameters || []).map((param) => ({
+    result.searchParameters = searchParameters.map((param) => ({
       name: param.name as string,
       type: param.type as
         | 'string'

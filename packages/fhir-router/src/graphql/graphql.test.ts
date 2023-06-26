@@ -1180,7 +1180,7 @@ describe('GraphQL', () => {
     };
     const fhirRouter = new FhirRouter();
     const res = await graphqlHandler(request, repo, fhirRouter);
-    expect(res[0]?.issue?.[0]?.details?.text).toEqual(
+    expect(res[0].issue?.[0]?.details?.text).toEqual(
       'Field "PatientUpdate" argument "res" of type "PatientCreate!" is required, but it was not provided.'
     );
   });

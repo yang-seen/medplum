@@ -106,7 +106,8 @@ const ItemComponent = forwardRef<HTMLDivElement, any>(
 
     if (resource.resourceType === 'Patient') {
       helpText = resource.birthDate;
-    } else if (resource.resourceType === 'ServiceRequest') {
+    } else {
+      // resourceType is 'ServiceRequest'
       helpText = resource.subject?.display;
     }
 

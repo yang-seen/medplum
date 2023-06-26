@@ -49,10 +49,7 @@ export function buildGraphQLOutputType(resourceType: string): GraphQLOutputType 
   if (resourceType === 'ResourceList') {
     return new GraphQLUnionType({
       name: 'ResourceList',
-      types: () =>
-        getResourceTypes()
-          .map(getGraphQLOutputType)
-          .filter((t) => !!t) as GraphQLObjectType[],
+      types: () => getResourceTypes().map(getGraphQLOutputType) as GraphQLObjectType[],
       resolveType: resolveTypeByReference,
     });
   }

@@ -207,7 +207,7 @@ function getEnumValues(elementDefinition: ElementDefinition): string[] | undefin
       elementDefinition.binding.valueSet !== 'http://hl7.org/fhir/ValueSet/defined-types|4.0.1'
     ) {
       const values = getValueSetValues(elementDefinition.binding.valueSet);
-      if (values && values.length > 0) {
+      if (values.length > 0) {
         return values;
       }
     }

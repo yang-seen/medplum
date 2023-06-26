@@ -58,7 +58,7 @@ export function ResourcePropertiesTable(props: { properties: PropertyDocInfo[] }
   );
 }
 
-export function SearchParamsTable(props: { searchParams: SearchParamDocInfo[] }): JSX.Element {
+export function SearchParamsTable(props: { searchParams: SearchParamDocInfo[] | undefined }): JSX.Element {
   const searchParams = props.searchParams;
   if (!searchParams || searchParams.length === 0) {
     return <em>None</em>;
@@ -107,7 +107,7 @@ function renderPropertyTypes(property: PropertyDocInfo): JSX.Element {
   );
 }
 
-function renderReferenceType(referenceTypes: PropertyTypeDocInfo[]): JSX.Element {
+function renderReferenceType(referenceTypes: PropertyTypeDocInfo[] | undefined): JSX.Element {
   const verticalizeLinks = referenceTypes.length > 2;
   const separator = (i: number): string => {
     if (i < referenceTypes.length - 1) {

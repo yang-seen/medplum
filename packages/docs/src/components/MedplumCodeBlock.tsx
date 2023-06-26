@@ -21,7 +21,7 @@ export default function MedplumCodeBlock({
     throw new Error("Only one of 'selectLines' or 'selectBlocks' can be specified");
   }
 
-  let codeLines: string[] = code.split('\n');
+  let codeLines: (string | null)[] = code.split('\n');
 
   // Get the line ranges for all the blocks that have been selected.
   const linesToRemove = new Set<number>();

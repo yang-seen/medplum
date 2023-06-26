@@ -107,7 +107,7 @@ export async function graphqlHandler(
   }
 
   const introspection = isIntrospectionQuery(query);
-  if (introspection && !router.options?.introspectionEnabled) {
+  if (introspection && !router.options.introspectionEnabled) {
     return [forbidden];
   }
 

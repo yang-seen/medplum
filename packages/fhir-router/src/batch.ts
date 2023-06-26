@@ -32,7 +32,7 @@ export async function processBatch(router: FhirRouter, repo: FhirRepository, bun
  * In particular, it tracks rewritten ID's as necessary.
  */
 class BatchProcessor {
-  private readonly ids: Record<string, Resource>;
+  private readonly ids: Partial<Record<string, Resource>>;
 
   /**
    * Creates a batch processor.

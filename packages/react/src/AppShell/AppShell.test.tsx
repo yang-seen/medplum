@@ -97,9 +97,9 @@ describe('AppShell', () => {
     const input = screen.getByPlaceholderText('Resource Type') as HTMLInputElement;
 
     for (const combobox of comboboxes) {
-      const element = combobox.querySelector(`input[name="resourceType"]`) as HTMLInputElement;
+      const element = combobox.querySelector(`input[name="resourceType"]`);
       if (element) {
-        resultInput = element;
+        resultInput = element as HTMLInputElement;
         break;
       }
     }
