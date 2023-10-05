@@ -26,10 +26,13 @@ const useStyles = createStyles((theme) => ({
     transition: 'background-color 100ms ease',
 
     '&:hover': {
-      backgroundColor: theme.fn.lighten(
-        theme.fn.variant({ variant: 'filled', color: theme.primaryColor }).background as string,
-        0.8
-      ),
+      backgroundColor:
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[9]
+          : theme.fn.lighten(
+              theme.fn.variant({ variant: 'filled', color: theme.primaryColor }).background as string,
+              0.8
+            ),
     },
   },
 
@@ -39,10 +42,13 @@ const useStyles = createStyles((theme) => ({
     transition: 'background-color 100ms ease',
 
     '&:hover': {
-      backgroundColor: theme.fn.lighten(
-        theme.fn.variant({ variant: 'filled', color: theme.primaryColor }).background as string,
-        0.8
-      ),
+      backgroundColor:
+        theme.colorScheme === 'dark'
+          ? theme.colors.dark[9]
+          : theme.fn.lighten(
+              theme.fn.variant({ variant: 'filled', color: theme.primaryColor }).background as string,
+              0.8
+            ),
     },
   },
 
@@ -57,10 +63,13 @@ const useStyles = createStyles((theme) => ({
   },
 
   userActive: {
-    backgroundColor: theme.fn.lighten(
-      theme.fn.variant({ variant: 'filled', color: theme.primaryColor }).background as string,
-      0.8
-    ),
+    backgroundColor:
+      theme.colorScheme === 'dark'
+        ? theme.colors.dark[9]
+        : theme.fn.lighten(
+            theme.fn.variant({ variant: 'filled', color: theme.primaryColor }).background as string,
+            0.8
+          ),
   },
 }));
 
