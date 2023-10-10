@@ -56,6 +56,9 @@ export function main(): void {
 
   // Then add element types
   for (const typeSchema of Object.values(globalSchema.types)) {
+    if (!typeSchema.elementDefinition) {
+      continue;
+    }
     const typeName = buildTypeName((typeSchema.elementDefinition.path as string).split('.'));
     if (typeSchema.structureDefinition.url?.startsWith('https://medplum.com/fhir/StructureDefinition/')) {
       if (

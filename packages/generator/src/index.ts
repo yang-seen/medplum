@@ -42,7 +42,11 @@ export function main(): void {
 function writeIndexFile(): void {
   const names = Object.values(globalSchema.types)
     .filter(
-      (t) => t.structureDefinition.name !== 'DomainResource' && !t.parentType && !isLowerCase(t.display.charAt(0))
+      (t) =>
+        t.structureDefinition &&
+        t.structureDefinition.name !== 'DomainResource' &&
+        !t.parentType &&
+        !isLowerCase(t.display.charAt(0))
     )
     .map((t) => t.structureDefinition.name as string);
   names.push('ResourceType');
@@ -281,11 +285,11 @@ function getTypeScriptTypeForProperty(property: ElementDefinition, typeDefinitio
     case 'http://hl7.org/fhirpath/System.String':
       baseType = 'string';
       if (property.binding?.valueSet && property.binding.strength === 'required') {
-        if (property.binding.valueSet === 'http://hl7.org/fhir/ValueSet/resource-types|4.0.1') {
+        if (property.binding.valueSet.startsWith('http://hl7.org/fhir/ValueSet/resource-types')) {
           baseType = 'ResourceType';
         } else if (
-          property.binding.valueSet !== 'http://hl7.org/fhir/ValueSet/all-types|4.0.1' &&
-          property.binding.valueSet !== 'http://hl7.org/fhir/ValueSet/defined-types|4.0.1'
+          !property.binding.valueSet.startsWith('http://hl7.org/fhir/ValueSet/all-types') &&
+          !property.binding.valueSet.startsWith('http://hl7.org/fhir/ValueSet/defined-types')
         ) {
           const values = getValueSetValues(property.binding.valueSet);
           if (values && values.length > 0) {
