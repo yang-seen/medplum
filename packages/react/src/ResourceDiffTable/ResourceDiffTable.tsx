@@ -1,9 +1,10 @@
 import { createStyles } from '@mantine/core';
-import { getDataType, getPropertyDisplayName, stringify, toTypedValue } from '@medplum/core';
+import { capitalize, evalFhirPathTyped, toTypedValue } from '@medplum/core';
 import { Resource } from '@medplum/fhirtypes';
 import React, { useEffect, useState } from 'react';
+import { createPatch } from 'rfc6902';
 import { useMedplum } from '../MedplumProvider/MedplumProvider';
-import { getValueAndType, ResourcePropertyDisplay } from '../ResourcePropertyDisplay/ResourcePropertyDisplay';
+import { ResourcePropertyDisplay } from '../ResourcePropertyDisplay/ResourcePropertyDisplay';
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -22,11 +23,15 @@ const useStyles = createStyles((theme) => ({
 
   removed: {
     color: theme.colors.red[7],
+    fontFamily: 'monospace',
     textDecoration: 'line-through',
+    whiteSpace: 'pre-wrap',
   },
 
   added: {
     color: theme.colors.green[7],
+    fontFamily: 'monospace',
+    whiteSpace: 'pre-wrap',
   },
 }));
 
@@ -51,57 +56,56 @@ export function ResourceDiffTable(props: ResourceDiffTableProps): JSX.Element | 
     return null;
   }
 
-  const typeSchema = getDataType(props.original.resourceType);
+  const patch = createPatch(props.original, props.revised);
+  const typedOriginal = [toTypedValue(props.original)];
+  const typedRevised = [toTypedValue(props.revised)];
+  // const tests = createTests(props.original, patch);
 
   return (
     <table className={classes.root}>
       <colgroup>
-        <col style={{ width: '30%' }} />
+        <col style={{ width: '10%' }} />
+        <col style={{ width: '20%' }} />
         <col style={{ width: '35%' }} />
         <col style={{ width: '35%' }} />
       </colgroup>
       <thead>
         <tr>
+          <th>Operation</th>
           <th>Property</th>
           <th>Before</th>
           <th>After</th>
         </tr>
       </thead>
       <tbody>
-        {Object.entries(typeSchema.elements).map(([key, property]) => {
-          if (key === 'id' || key === 'meta') {
+        {patch.map((op) => {
+          if (op.path.startsWith('/meta')) {
             return null;
           }
 
-          const [originalPropertyValue, originalPropertyType] = getValueAndType(toTypedValue(props.original), key);
-          const [revisedPropertyValue, revisedPropertyType] = getValueAndType(toTypedValue(props.revised), key);
-          if (isEmpty(originalPropertyValue) && isEmpty(revisedPropertyValue)) {
-            return null;
-          }
+          console.log(op);
 
-          if (stringify(originalPropertyValue) === stringify(revisedPropertyValue)) {
-            return null;
-          }
+          const path = op.path;
+          const fhirPath = jsonPathToFhirPath(path);
+          // const originalValue = tests.find((test) => test.path === path)?.value;
+          // const revisedValue = (op as any).value;
+          // const originalValue = getTypedPropertyValue(typedOriginal, fhirPath);
+          // const revisedValue = getTypedPropertyValue(typedRevised, fhirPath);
+          const originalValue = evalFhirPathTyped(fhirPath, typedOriginal);
 
           return (
-            <tr key={key}>
-              <td>{getPropertyDisplayName(key)}</td>
+            <tr key={`op-${op.op}-${op.path}`}>
+              <td>{capitalize(op.op)}</td>
+              <td>{fhirPath}</td>
               <td className={classes.removed}>
                 <ResourcePropertyDisplay
                   property={property}
-                  propertyType={originalPropertyType}
+                  propertyType={originalValue.type}
                   value={originalPropertyValue}
                   ignoreMissingValues={true}
                 />
               </td>
-              <td className={classes.added}>
-                <ResourcePropertyDisplay
-                  property={property}
-                  propertyType={revisedPropertyType}
-                  value={revisedPropertyValue}
-                  ignoreMissingValues={true}
-                />
-              </td>
+              <td className={classes.added}>{formatJsonValue(revisedValue)}</td>
             </tr>
           );
         })}
@@ -110,10 +114,32 @@ export function ResourceDiffTable(props: ResourceDiffTableProps): JSX.Element | 
   );
 }
 
-function isEmpty(value: unknown): boolean {
-  return (
-    !value ||
-    (Array.isArray(value) && value.length === 0) ||
-    (typeof value === 'object' && Object.keys(value).length === 0)
-  );
+function jsonPathToFhirPath(path: string): string {
+  const parts = path.split('/').filter(Boolean);
+  let result = '';
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (part === '-') {
+      result += '.last()';
+    } else if (/^\d+$/.test(part)) {
+      result += `[${part}]`;
+    } else {
+      if (i > 0) {
+        result += '.';
+      }
+      result += part;
+    }
+  }
+  return result;
+}
+
+function formatJsonValue(value: any): string {
+  if (!value) {
+    return '';
+  }
+  let result = JSON.stringify(value, null, 2);
+  if (result.length > 100) {
+    result = result.substr(0, 100) + '...';
+  }
+  return result;
 }

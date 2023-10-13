@@ -48,6 +48,7 @@
     "jest-each": "29.7.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "rfc6902": "5.0.1",
     "rimraf": "5.0.1",
     "storybook": "7.4.2",
     "typescript": "5.2.2"
@@ -59,7 +60,8 @@
     "@mantine/notifications": "^6.0.0",
     "@medplum/core": "*",
     "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0"
+    "react-dom": "^17.0.2 || ^18.0.0",
+    "rfc6902": "^5.0.1"
   },
   "peerDependenciesMeta": {
     "@emotion/react": {

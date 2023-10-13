@@ -44,6 +44,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "6.16.0",
+    "rfc6902": "5.0.1",
     "vite": "4.4.9"
   },
   "browserslist": [
