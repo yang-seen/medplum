@@ -584,7 +584,7 @@ class HealthGorillaRequestGroupBuilder {
             subscriber: undefined,
           };
 
-          (resultAccount.coverage as AccountCoverage[])[i].coverage = createReference(resultCoverage);
+          ((resultAccount.coverage as AccountCoverage[])[i].coverage as Reference).reference = '#' + resultCoverage.id;
           this.coverages = append(this.coverages, resultCoverage);
 
           if (medplumCoverage.payor) {
