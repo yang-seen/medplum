@@ -11,6 +11,7 @@ import {
 } from '@medplum/core';
 import {
   Account,
+  AccountCoverage,
   Annotation,
   CodeableConcept,
   Coverage,
@@ -249,6 +250,9 @@ export async function handler(medplum: MedplumClient, event: BotEvent<Questionna
   // Specimen collected date/time
   // This is an optional field.  If present, it will create a Specimen resource.
   builder.specimenCollectedDateTime = answers.specimenCollectedDateTime?.valueDateTime;
+
+  // Order level notes
+  builder.note = answers.orderNote?.valueString;
 
   // Place the order
   const requestGroup = builder.buildRequestGroup();
@@ -560,7 +564,6 @@ class HealthGorillaRequestGroupBuilder {
 
     const resultAccount: Account = {
       ...medplumAccount,
-      coverage: undefined,
     };
 
     if (resultAccount.type?.coding?.[0]?.code === 'patient') {
@@ -568,7 +571,8 @@ class HealthGorillaRequestGroupBuilder {
     }
 
     if (medplumAccount.coverage) {
-      for (const accountCoverage of medplumAccount.coverage) {
+      for (let i = 0; i < medplumAccount.coverage.length; i++) {
+        const accountCoverage = medplumAccount.coverage[i];
         const coverageRef = accountCoverage?.coverage;
         if (coverageRef) {
           const medplumCoverage = await medplum.readReference(coverageRef);
@@ -580,11 +584,7 @@ class HealthGorillaRequestGroupBuilder {
             subscriber: undefined,
           };
 
-          resultAccount.coverage = append(resultAccount.coverage, {
-            coverage: { reference: '#' + resultCoverage.id },
-            priority: 1,
-          });
-
+          (resultAccount.coverage as AccountCoverage[])[i].coverage = createReference(resultCoverage);
           this.coverages = append(this.coverages, resultCoverage);
 
           if (medplumCoverage.payor) {
